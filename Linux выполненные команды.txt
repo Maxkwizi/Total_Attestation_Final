@@ -1,0 +1,56 @@
+1. Используя команду cat в терминале операционной системы Linux, создать
+два файла Домашние животные (заполнив файл собаками, кошками,
+хомяками) и Вьючные животными заполнив файл Лошадьми, верблюдами и
+ослы), 
+	pwd
+	mkdir Animals
+	cd Animals
+	cat > home_animals.txt
+		dogs
+		cats
+		hamsters
+		^C
+	cat > pack_animals.txt
+		horses
+		donkeys
+		camels
+		^C
+	
+а затем объединить их. 
+	
+	cat home_animals.txt pack_animals.txt > union_animals.txt
+	
+Просмотреть содержимое созданного файла.
+
+	cat union_animals.txt
+
+Переименовать файл, дав ему новое имя (Друзья человека).
+	
+	ls
+	mv union_animals.txt friends_of_human.txt
+	ls
+	cat friend_of_human.txt
+
+2. Создать директорию, переместить файл туда
+	mkdir Friends
+	sudo rm friend_of_human.txt /Friends
+	cd Friends
+	ls
+	cat friends_of_human.txt
+
+3. Подключить дополнительный репозиторий MySQL. Установить любой пакет из этого репозитория.
+	
+	sudo apt install mysql-server
+	sudo apt install mysql-client
+	sudo apt update
+	sudo apt upgrade
+
+4. Установить и удалить deb-пакет с помощью dpkg.
+	cd /var/cache/apt/archives
+	ls
+	sudo dpkg -i libreoffice-impress_1%3a7.3.7-0ubuntu0.22.04.6_amd64.deb
+	sudo dpkg -r libreoffice-impress_1%3a7.3.7-0ubuntu0.22.04.6_amd64.deb
+	
+5. Выложить историю команд в терминале ubuntu
+	(скрины в папке screenshots и описаны в данном файле)
+

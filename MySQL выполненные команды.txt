@@ -1,0 +1,188 @@
+6. Нарисовать диаграмму, в которой есть класс родительский класс, домашние
+животные и вьючные животные, в составы которых в случае домашних
+животных войдут классы: собаки, кошки, хомяки, а в класс вьючные животные
+войдут: Лошади, верблюды и ослы.
+
+	Диаграмма выполненна в файле "Home_animals.drawio"
+
+7. В подключенном MySQL репозитории создать базу данных “Друзья
+человека”
+	sudo mysql -u vboxuser
+	
+	CREATE DATABASE Human_friends;
+	show databases;
+	use Human_friends;
+
+8. Создать таблицы с иерархией из диаграммы в БД 
+
+	-- Таблица Animals (Родительский класс)
+	CREATE TABLE Animals (
+    	id INT AUTO_INCREMENT KEY,
+    	name VARCHAR(255) NOT NULL,
+    	birth_date DATE NOT NULL,
+	animal_type VARCHAR(255) NOT NULL
+	);
+
+		-- Таблица Home_animals (Домашние животные)
+		CREATE TABLE Home_animals (
+    		id INT AUTO_INCREMENT PRIMARY KEY,
+    		animal_id INT,
+    		command VARCHAR(255) NOT NULL,
+    		FOREIGN KEY (animal_id) REFERENCES Animals(id)
+		);
+
+			-- Таблица Dogs (Собаки)
+			CREATE TABLE Dogs (
+   	 		id INT AUTO_INCREMENT PRIMARY KEY,
+    			home_animal_id INT,
+    			name VARCHAR(255) NOT NULL,
+			command VARCHAR(255) NOT NULL,	
+			FOREIGN KEY (home_animal_id) REFERENCES Home_animals(id)
+			);
+
+			-- Таблица Cats (Кошки)
+			CREATE TABLE Cat (
+    			id INT AUTO_INCREMENT PRIMARY KEY,
+    			home_animal_id INT,
+    			FOREIGN KEY (home_animal_id) REFERENCES Home_animals(id)
+			);
+
+			-- Таблица Hamsters (Хомяки)
+			CREATE TABLE Hamster (
+    			id INT AUTO_INCREMENT PRIMARY KEY,
+    			home_animal_id INT,
+    			FOREIGN KEY (home_animal_id) REFERENCES Home_animals(id)
+			);
+
+		-- Таблица Pack_animals (Вьючные животные)
+		CREATE TABLE Pack_animals (
+    		id INT AUTO_INCREMENT PRIMARY KEY,
+    		animal_id INT,
+    		command VARCHAR(255) NOT NULL,
+    		FOREIGN KEY (animal_id) REFERENCES Animals(id)
+		);
+
+			-- Таблица Horses (Лошади)
+			CREATE TABLE Horses (
+    			id INT AUTO_INCREMENT PRIMARY KEY,
+    			pack_animal_id INT,
+    			FOREIGN KEY (pack_animal_id) REFERENCES Pack_animals(id)
+			);
+
+			-- Таблица Donkeys (Ослы)
+			CREATE TABLE Donkeys (
+   	 		id INT AUTO_INCREMENT PRIMARY KEY,
+    			pack_animal_id INT,
+    			FOREIGN KEY (pack_animal_id) REFERENCES Pack_animals(id)
+			);
+
+			-- Таблица Camels (Верблюды)
+			CREATE TABLE Camels (
+    			id INT AUTO_INCREMENT PRIMARY KEY,
+    			pack_animal_id INT,
+    			FOREIGN KEY (pack_animal_id) REFERENCES Pack_animals(id)
+			);
+
+
+9. Заполнить низкоуровневые таблицы именами животных, командами
+которые они выполняют и датами рождения:
+
+	-- Заполняем поля "имя", "дата рождения" в таблицу Animals
+	INSERT INTO Animals (name, birth_date) VALUES ('Буч', '12.05.2000');
+	INSERT INTO Animals (name, birth_date) VALUES ('Сабрина', '25.11.2008');
+	INSERT INTO Animals (name, birth_date) VALUES ('Пахомыч', '05.03.2023');
+	INSERT INTO Animals (name, birth_date) VALUES ('Варна', '04.09.2018');
+	INSERT INTO Animals (name, birth_date) VALUES ('Ишак', '21.07.2017');
+	INSERT INTO Animals (name, birth_date) VALUES ('Вася', '12.06.2015');
+
+	-- Заполняем поля "id животного" и "команда" в таблицу Home_animals
+	INSERT INTO Home_animals (animal_id, command) VALUES (1, 'Служить');
+	INSERT INTO Home_animals (animal_id, command) VALUES (2, 'Голос');
+	INSERT INTO Home_animals (animal_id, command) VALUES (3, 'Кувырок');
+
+	-- Заполняем значения id в низкоуровневой таблице непосредственно домашних животных
+	INSERT INTO Dogs (home_animal_id) VALUES (1);
+	INSERT INTO Cats (home_animal_id) VALUES (2);
+	INSERT INTO Hamsters (home_animal_id) VALUES (3);
+
+	-- Заполняем поля "id животного" и "команда" в таблицу Pack_animals
+	INSERT INTO Pack_animals (animal_id, command) VALUES (1, 'Галоп');
+	INSERT INTO Pack_animals (animal_id, command) VALUES (2, 'Стоп');
+	INSERT INTO Pack_animals (animal_id, command) VALUES (3, 'Лежать');
+
+	-- Заполняем значения id в низкоуровневой таблице непосредственно вьючных животных
+	INSERT INTO Horses (pack_animal_id) VALUES (1);
+	INSERT INTO Camels (pack_animal_id) VALUES (2);
+	INSERT INTO Donkeys (pack_animal_id) VALUES (3);
+
+10. Удалив из таблицы верблюдов, т.к. верблюдов решили перевезти в другой
+питомник на зимовку. Объединить таблицы лошади, и ослы в одну таблицу.
+
+	-- Удаляем верблюдов из таблицы Camels:
+	DELETE FROM Camel;
+
+	-- Создаём новую таблицу для объединения лошадей и ослов:
+	CREATE TABLE Union_pack_animals (
+    	id INT AUTO_INCREMENT PRIMARY KEY,
+    	pack_animal_id INT,
+    	animal_type ENUM('Horses', 'Donkeys') NOT NULL,
+    	FOREIGN KEY (pack_animal_id) REFERENCES Pack_animals(id)
+	);
+	
+	-- Переносим данные из таблицы Horses
+	INSERT INTO Union_pack_animals (pack_animal_id, animal_type)
+	SELECT pack_animal_id, 'Horses' FROM Horses;
+
+	-- Переносим данные из таблицы Donkeys
+	INSERT INTO Union_pack_animals (pack_animal_id, animal_type)
+	SELECT pack_animal_id, 'Donkeys' FROM Donkeys;
+
+	--Проверяем объединённую таблицу
+	SELECT * FROM Union_pack_animals;
+
+11.Создать новую таблицу “молодые животные” в которую попадут все
+животные старше 1 года, но младше 3 лет и в отдельном столбце с точностью 
+до месяца подсчитать возраст животных в новой таблице
+
+	--Создаём новую таблицу "молодые животные":
+	CREATE TABLE Young_animals (
+    	id INT AUTO_INCREMENT PRIMARY KEY,
+    	name VARCHAR(255) NOT NULL,
+    	birth_date DATE NOT NULL,
+    	age_months INT NOT NULL
+	);
+
+	--Переносим животных в новую таблицу согласно условию:
+	INSERT INTO YoungAnimals (name, birth_date, age_months)
+	SELECT 
+    		name,
+    		birth_date,
+   		TIMESTAMPDIFF(MONTH, birth_date, CURDATE()) AS age_months
+	FROM 
+    		Animals
+	WHERE 
+    		TIMESTAMPDIFF(YEAR, birth_date, CURDATE()) BETWEEN 1 AND 3;
+	
+12. Объединить все таблицы в одну, при этом сохраняя поля, указывающие на
+прошлую принадлежность к старым таблицам.
+
+	--Создаём общую таблицу для объединения всех животных:
+	CREATE TABLE All_animals (
+    	id INT AUTO_INCREMENT PRIMARY KEY,
+    	name VARCHAR(255),
+    	birth_date DATE,
+    	animal_type ENUM('Dogs', 'Cats', 'Hamsters', 'Horses', 'Donkeys') NOT NULL,
+    	old_table_name ENUM('Animals', 'Home_animal', 'Pack_animals', 'Union_pack_animals', 'Young_animals') NOT NULL
+);
+	--Объединяем животных с учётом их связей с предыдущими таблицами:
+	INSERT INTO All_animals (name, birth_date, old_table_name)
+	SELECT name, birth_date, NOT NULL, 'Animals' 
+	FROM Animals;
+
+	INSERT INTO All_animals (animal_id, command, old_table_name)
+	SELECT animal_id, command, 'Home_animals'
+	FROM Home_animals;
+	
+	INSERT INTO All_animals (animal_id, command, old_table_name)
+	SELECT animal_id, command, 'Pack_animals'
+	FROM Pack_animals;
